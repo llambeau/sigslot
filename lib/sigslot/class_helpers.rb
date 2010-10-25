@@ -19,7 +19,19 @@ module SigSlot
                params.each do |sym| 
                 raise ArgumentError, "Signal parameters must be an array of Symbols" unless sym.is_a? Symbol
             end
-            @signals[name] = params
+            signals[name] = params
+        end
+        
+        # Access signals
+        def signals
+            @signals ||= {
+                :signal_emitted => [:signal, :params] # Special signal to monitor all emissions of an object
+            }
+        end
+
+        # Access slots
+        def slots
+            @slots ||= []
         end
         
         # Define a new slot
@@ -38,7 +50,7 @@ module SigSlot
             names = [names].flatten
             names.each do |name|
                 name = valid_signal_name!(name)
-                @slots << name
+                slots << name
             end
         end            
         

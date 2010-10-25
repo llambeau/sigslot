@@ -5,12 +5,6 @@ module SigSlot
     # Decorates the including class with the definition helpers
     def self.included(base)
         @@signal_emitted_connections = [] 
-        base.class_eval do
-            @signals = {
-                :signal_emitted => [:signal, :params] # Special signal to monitor all emissions of an object
-            }
-            @slots = []
-        end
         base.extend ClassMethods
     end
     
