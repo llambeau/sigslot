@@ -1,6 +1,3 @@
-require 'test/unit'
-require 'sigslot'
-
 module SigSlot
     
     module Tests
@@ -47,8 +44,8 @@ module SigSlot
         class SigSlotTestScenario < Test::Unit::TestCase
         
             def test_instances_dont_share_connections
-                test1 = SimpleSigSlotTest.new
-                test2 = SimpleSigSlotTest.new
+                test1 = SimpleSigSlotObject.new
+                test2 = SimpleSigSlotObject.new
                 assert_not_equal(test1.connections.object_id, test2.connections.object_id)
             end
             
@@ -64,61 +61,6 @@ module SigSlot
                 
                 # Works also with objects
                 assert_equal(test, test.slot_that_returns_first_parameter(test))
-            end
-            
-            def test_emit_checks_signal_validity
-                test = SimpleSigSlotTest.new
-                
-                # Errors raised for unknown signals
-                assert_raise SigSlot::SignalNotFound do
-                    test.emit_signal :unknown_signal
-                end
-                assert_raise SignalNotFound do
-                    test.emit_signal :unknown_signal, "hi!"
-                end
-                
-                # Nothing raised for correct signals and parameters
-                assert_nothing_raised do
-                    test.emit_signal :signal_without_parameters
-                end
-                assert_nothing_raised do
-                    test.emit_signal :signal_with_parameters, 1, 2
-                end
-            end
-        
-            def test_connect_only_accepts_signals_and_slots_definitions
-                test = SimpleSigSlotTest.new
-                
-                assert_raise ArgumentError do
-                    test.connect("test", "test")
-                end
-                assert_raise ArgumentError do
-                    test.connect(:signal_without_parameters, test)
-                end
-            end
-            
-            def test_connect_checks_slot_existence
-                test = SimpleSigSlotTest.new
-                
-                assert_raise SlotNotFound do
-                    test.connect :signal_without_parameters, test.slot(:invalid_slot)
-                end
-
-                assert_raise SlotNotFound do
-                    SigSlot.connect test.signal(:signal_without_parameters), test.slot(:invalid_slot)
-                end
-            end
-            
-            def test_connect_checks_signal_existence
-                test = SimpleSigSlotTest.new
-                
-                assert_raise SignalNotFound do
-                    test.connect :unknown_signal, test.slot(:slot_without_parameters)
-                end
-
-                assert_raise SignalNotFound do
-                    SigSlot.connect test.signal(:unknown_signal), test.slot(:slot_without_parameters)
-                end
             end
             
             def test_slot_without_parameters_can_be_bound_to_signals_with_parameters
