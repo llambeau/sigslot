@@ -1,10 +1,11 @@
 module SigSlot
 
     # Connect a signal to a slot, but provides a block to rewrite parameters before to propagate
-    def self.connect_and_rewrite(sender, signal, recipient, endpoint, &block)
+    def self.connect_and_rewrite(signal, endpoint, &block)
+        raise ArgumentError, "Block missing for connect_and_rewrite" unless block
         rewriter = Rewriter.new(&block)
-        sender.connect(signal, rewriter, SLOT(:rewrite))
-        rewriter.connect(SIGNAL(:rewrited), recipient, endpoint)
+        SigSlot.connect signal, rewriter.slot(:rewrite)
+        rewriter.connect :rewrited, endpoint
     end
     
     # Instancied by connect_and_rewrite to provide a mechanism

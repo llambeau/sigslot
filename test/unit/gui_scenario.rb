@@ -53,8 +53,8 @@ module SigSlot
                 control.plus
                 assert_equal(0, lcd.value)
          
-                control.connect(SIGNAL(:plus_clicked), lcd, SLOT(:increment))
-                control.connect(SIGNAL(:minus_clicked), lcd, SLOT(:decrement))
+                control.connect :plus_clicked, lcd.slot(:increment)
+                control.connect :minus_clicked, lcd.slot(:decrement)
 
                 assert_equal(0, lcd.value)
                 control.plus
@@ -71,7 +71,7 @@ module SigSlot
                 lcd = LCDInteger.new
                 control = RangeControl.new
 
-                SigSlot.connect_and_rewrite(control, SIGNAL(:plus_clicked), lcd, SLOT(:set_value)) { |params|
+                SigSlot.connect_and_rewrite(control.signal(:plus_clicked), lcd.slot(:set_value)) { |params|
                     [20]
                 }
                 assert_equal(0, lcd.value)

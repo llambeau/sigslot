@@ -19,42 +19,28 @@ module SigSlot
     end
 
     # Connect a signal to a slot 
-    def self.connect(sender, signal, recipient, endpoint)
-        if sender == SigSlot then
-            unless signal.is_a? SignalDefinition and signal.name == :signal_emitted then
-                raise ArgumentError, "Only special signal :signal_emitted can be bound on SigSlot module"
-            else
-                @@signal_emitted_connections << {:recipient => recipient, :endpoint => endpoint}
-            end
-        else
-            sender.connect(signal, recipient, endpoint)
-        end
+    def self.connect(signal, endpoint)
+        raise ArgumentError, "Bad signal definition #{signal.inspect}" unless SignalDefinition === signal
+        signal.object.connect(signal.name, endpoint)
     end
     
     # Connect a signal to a slot
-    def connect(signal, recipient, endpoint)
-        signal = valid_signal!(self, signal)
-        valid_endpoint!(recipient, endpoint)
-        connections[signal] << {:recipient => recipient, :endpoint => endpoint}
+    def connect(signal, endpoint)
+        raise ArgumentError, "Only signal names must be given as first argument to object.connect" unless Symbol === signal
+        signal = valid_signal!(SignalDefinition.new(self, signal))
+        endpoint = valid_endpoint!(endpoint)
+        connections[signal.name] << endpoint
     end
     
     # Disconnect a slot/signal from a signal
-    def self.disconnect(sender, signal=nil, recipient=nil, endpoint=nil)
-        if sender == SigSlot then
-            unless SignalDefinition === signal and signal.name == :signal_emitted then
-                raise ArgumentError, "Only special signal :signal_emitted can be bound/unbound on SigSlot module"
-            else
-                purge_connections({:signal_emitted => @@signal_emitted_connections}, signal, recipient, endpoint)
-            end
-        else
-            sender.disconnect(signal, recipient, endpoint)
-        end
+    def self.disconnect(signal, endpoint=nil)
+        signal = valid_signal!(signal)
+        signal.object.disconnect(signal.name, endpoint)
     end
     
     # Disconnect a slot/signal from a signal
-    def disconnect(signal, recipient=nil, endpoint=nil)
-        signal = valid_signal!(self, signal)
-        purge_connections(connections, signal, recipient, endpoint)
+    def disconnect(signal=nil, endpoint=nil)
+        purge_connections(connections, signal, endpoint)
     end
     
     # Access connections
@@ -74,17 +60,17 @@ module SigSlot
     
     # Returns a specific signal
     def signal(name)
-        puts name
+        valid_signal_def! SignalDefinition.new(self, name)
     end
     
     # Returns a specific slot
     def slot(name)
-        puts name
+        valid_slot_def! SlotDefinition.new(self, name)
     end
 
     # Emit a signal
     def emit(signal, params=[])
-        valid_signal!(self, signal)
+        valid_signal!(SignalDefinition.new(self, signal))
         raise ArgumentError, "Parameters must be an array" unless params.is_a? Array
         
         # Trigger all signals or slots bound to the emitted signal
@@ -108,10 +94,9 @@ module SigSlot
     # con is the endpoint definition
     # params is the params to pass to the endpoint 
     private
-    def trigger(signal, con, params)
-        recipient = con[:recipient]
+    def trigger(signal, endpoint, params)
+        recipient = endpoint.object
         # Propagate signals to bound signals
-        endpoint = con[:endpoint]
         case endpoint
         when SignalDefinition 
             recipient.emit(endpoint.name, params) # Emit bound signal
@@ -141,15 +126,16 @@ module SigSlot
     end
     
     # Purges desired connection
-    def purge_connections(connections, signal, recipient, endpoint)
+    def purge_connections(connections, signal, endpoint)
         if signal.nil? then
             connections.clear
-        elsif recipient.nil? then
-            connections[signal].clear
-        elsif endpoint.nil? then
-            connections[signal].delete_if { |item| item[:recipient] == recipient }
         else
-            connections[signal].delete_if { |item| item[:recipient] == recipient && item[:endpoint] == endpoint }
+            name = valid_signal_name!(signal)        
+            if endpoint.nil? then
+                connections[name].clear
+            else
+                connections[name].delete_if { |item| item == endpoint }
+            end
         end
     end
     

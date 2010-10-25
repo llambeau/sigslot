@@ -42,7 +42,7 @@ module SigSlot
             
             def gives_birth
                 baby = Baby.new
-                baby.connect(SIGNAL(:cry), self, SLOT(:feed_baby))
+                baby.connect(:cry, self.slot(:feed_baby))
                 return baby
             end
     

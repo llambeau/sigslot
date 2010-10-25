@@ -2,25 +2,29 @@ module SigSlot
 
     # Used to represent a signal
     class SignalDefinition
-        attr_reader :name
-        def initialize(name)
-            @name = name
+        attr_reader :name, :object
+        def initialize(object, name)
+            @object, @name = object, name
         end
         
         def ==(obj)
-            SignalDefinition === obj && obj.name == @name
+            SignalDefinition === obj && 
+                obj.name == @name && 
+                obj.object == @object
         end
     end
 
     # Used to represent a slot
     class SlotDefinition
-        attr_reader :name
-        def initialize(name)
-            @name = name
+        attr_reader :name, :object
+        def initialize(object, name)
+            @object, @name = object, name
         end
 
         def ==(obj)
-            SlotDefinition === obj && obj.name == @name
+            SlotDefinition === obj &&
+                obj.name == @name && 
+                obj.object == @object
         end
     end
 

@@ -30,7 +30,7 @@ module SigSlot
         
             def test_inheritance_works
                 t = ChildClass.new
-                t.connect(SIGNAL(:my_signal), t, SLOT(:my_slot))
+                t.connect :my_signal, t.slot(:my_slot)
                 assert_equal(0, t.called)
                 t.emit_my_signal
                 assert_equal(1, t.called)
