@@ -1,6 +1,7 @@
 module SigSlot
 
     module Robustness
+    
         def valid_signal_name!(signal)
             case signal
             when Symbol

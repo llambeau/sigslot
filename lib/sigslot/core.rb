@@ -38,9 +38,28 @@ module SigSlot
         connections[signal] << {:recipient => recipient, :endpoint => endpoint}
     end
     
+    # Disconnect a slot/signal from a signal
+    def self.disconnect(sender, signal=nil, recipient=nil, endpoint=nil)
+        if sender == SigSlot then
+            unless SignalDefinition === signal and signal.name == :signal_emitted then
+                raise ArgumentError, "Only special signal :signal_emitted can be bound/unbound on SigSlot module"
+            else
+                purge_connections({:signal_emitted => @@signal_emitted_connections}, signal, recipient, endpoint)
+            end
+        else
+            sender.disconnect(signal, recipient, endpoint)
+        end
+    end
+    
+    # Disconnect a slot/signal from a signal
+    def disconnect(signal, recipient=nil, endpoint=nil)
+        signal = valid_signal!(self, signal)
+        purge_connections(connections, signal, recipient, endpoint)
+    end
+    
     # Access connections
     def connections
-        @connections ||=  Hash.new{|h,k| h[k] = []}
+        @connections ||=  Hash.new{|h,k| h[k] = [] }
     end
     
     # Access signals
@@ -51,6 +70,16 @@ module SigSlot
     # Access slots
     def slots
         self.class.slots
+    end
+    
+    # Returns a specific signal
+    def signal(name)
+        puts name
+    end
+    
+    # Returns a specific slot
+    def slot(name)
+        puts name
     end
 
     # Emit a signal
@@ -108,6 +137,19 @@ module SigSlot
                     recipient.send slot_name, *params[0..slot_arity-1]
                 end
             end
+        end
+    end
+    
+    # Purges desired connection
+    def purge_connections(connections, signal, recipient, endpoint)
+        if signal.nil? then
+            connections.clear
+        elsif recipient.nil? then
+            connections[signal].clear
+        elsif endpoint.nil? then
+            connections[signal].delete_if { |item| item[:recipient] == recipient }
+        else
+            connections[signal].delete_if { |item| item[:recipient] == recipient && item[:endpoint] == endpoint }
         end
     end
     

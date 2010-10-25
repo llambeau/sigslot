@@ -6,6 +6,10 @@ module SigSlot
         def initialize(name)
             @name = name
         end
+        
+        def ==(obj)
+            SignalDefinition === obj && obj.name == @name
+        end
     end
 
     # Used to represent a slot
@@ -13,6 +17,10 @@ module SigSlot
         attr_reader :name
         def initialize(name)
             @name = name
+        end
+
+        def ==(obj)
+            SlotDefinition === obj && obj.name == @name
         end
     end
 

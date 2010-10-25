@@ -246,6 +246,27 @@ module SigSlot
                 assert_equal([test, :signal_without_parameters], test.calls[:slot_with_parameters][:params])
             end
             
+            # Test disonnections
+            def test_disconnections
+                test = SimpleSigSlotTest.new
+                test2 = SimpleSigSlotTest.new
+                
+                # Test object.disconnect
+                test.connect(SIGNAL(:signal_without_parameters), test, SLOT(:slot_without_parameters))
+                test.disconnect(SIGNAL(:signal_without_parameters), test, SLOT(:slot_without_parameters))
+                test.emit_signal :signal_without_parameters
+                assert_equal(0, test.calls[:slot_without_parameters][:count])
+                
+                # Test object.disconnect to disconnect all connections for specific signal
+                test.connect(SIGNAL(:signal_with_parameters), test, SLOT(:slot_with_parameters))
+                test.connect(SIGNAL(:signal_with_parameters), test, SLOT(:slot_without_parameters))
+                test.disconnect(SIGNAL(:signal_with_parameters))
+                test.emit_signal :signal_with_parameters, [1,2]
+                test.calls.each_pair do |signal, infos|
+                    assert_equal(0, infos[:count])
+                end
+            end
+            
         end #SigSlotTestScenario
 
     end #Tests

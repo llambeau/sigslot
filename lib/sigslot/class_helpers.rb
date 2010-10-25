@@ -6,6 +6,18 @@ module SigSlot
 
         attr_accessor :connections, :signals, :slots
         
+        # Access signals
+        def signals
+            @signals ||= {
+                :signal_emitted => [:signal, :params] # Special signal to monitor all emissions of an object
+            }
+        end
+
+        # Access slots
+        def slots
+            @slots ||= []
+        end
+        
         # Define a new signal
         # 
         # A signal has a name (represented by symbol) and an optional list of parameters
@@ -20,18 +32,6 @@ module SigSlot
                 raise ArgumentError, "Signal parameters must be an array of Symbols" unless sym.is_a? Symbol
             end
             signals[name] = params
-        end
-        
-        # Access signals
-        def signals
-            @signals ||= {
-                :signal_emitted => [:signal, :params] # Special signal to monitor all emissions of an object
-            }
-        end
-
-        # Access slots
-        def slots
-            @slots ||= []
         end
         
         # Define a new slot
