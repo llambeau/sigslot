@@ -1,20 +1,11 @@
 require 'sigslot'
+require 'test/unit/example_sig_slot_object'
 
 module SigSlot
     
     module Tests
     
-        class SimpleSigSlotObject
-            include SigSlot
-            
-            signal :signal
-            slot :slot
-            
-            def slot 
-            end
-        end
-
-        class SigSlotConnectTest < Test::Unit::TestCase
+        class SigSlotBadConnectTest < Test::Unit::TestCase
 
             def testobj
                 @test ||= SimpleSigSlotObject.new
@@ -22,55 +13,68 @@ module SigSlot
             
             def test_object_connect_raises_for_invalid_signals
                 assert_raise ArgumentError do
-                    testobj.connect "invalid", testobj.slot(:slot)
+                    testobj.connect "invalid", testobj.slot(:slot_0_params)
+                end
+                assert_raise SignalNotFound do
+                    testobj.connect :invalid, testobj.slot(:slot_0_params)
                 end
                 assert_raise ArgumentError do
-                    testobj.connect :invalid, testobj.slot(:slot)
+                    testobj.connect testobj.signal(:signal), testobj.slot(:slot_0_params)
                 end
                 assert_raise ArgumentError do
-                    testobj.connect testobj.signal(:signal), testobj.slot(:slot)
+                    testobj.connect testobj.signal(:invalid), testobj.slot(:slot_0_params)
                 end
+                # :signal_emitted can't be connected as receiver
                 assert_raise ArgumentError do
-                    testobj.connect testobj.signal(:invalid), testobj.slot(:slot)
+                    testobj.connect :signal_0_params, testobj.signal(:signal_emitted)
+                end
+                # :signal_emitted can't be connected to another signal of the same object (infinite loop)
+                assert_raise InvalidSignalBinding do
+                    testobj.connect :signal_emitted, testobj.signal(:signal_0_params)
                 end
             end
         
             def test_sigslot_connect_raises_for_invalid_signals
                 assert_raise ArgumentError do
-                    SigSlot.connect "invalid", testobj.slot(:slot)
+                    SigSlot.connect "invalid", testobj.slot(:slot_0_params)
                 end
                 assert_raise ArgumentError do
-                    SigSlot.connect :invalid, testobj.slot(:slot)
+                    SigSlot.connect :invalid, testobj.slot(:slot_0_params)
                 end
-                assert_raise ArgumentError do
-                    SigSlot.connect testobj.signal(:invalid), testobj.slot(:slot)
+                assert_raise SignalNotFound do
+                    SigSlot.connect testobj.signal(:invalid), testobj.slot(:slot_0_params)
                 end
+                # :signal_emitted can't be connected as receiver
                 assert_raise ArgumentError do
-                    SigSlot.connect testobj.signal(:signal), testobj.signal(:signal_emitted)
+                    SigSlot.connect testobj.signal(:signal_0_params), testobj.signal(:signal_emitted)
+                end
+                # :signal_emitted can't be connected to another signal of the same object (infinite loop)
+                assert_raise InvalidSignalBinding do
+                    SigSlot.connect testobj.signal(:signal_emitted), testobj.signal(:signal_0_params)
                 end
             end
         
             def test_object_connect_raises_for_invalid_slots
                 assert_raise ArgumentError do
-                    testobj.connect :signal, "slot"
+                    testobj.connect :signal_0_params, "slot"
                 end
                 assert_raise ArgumentError do
-                    testobj.connect :signal, :slot
+                    testobj.connect :signal_0_params, :slot_0_params
                 end
-                assert_raise ArgumentError do
-                    testobj.connect :signal, testobj.slot(:invalid)
+                assert_raise SlotNotFound do
+                    testobj.connect :signal_0_params, testobj.slot(:invalid)
                 end
             end
         
             def test_sigslot_connect_raises_for_invalid_slots
                 assert_raise ArgumentError do
-                    SigSlot.connect testobj.signal(:signal), "slot"
+                    SigSlot.connect testobj.signal(:signal_0_params), "slot"
                 end
                 assert_raise ArgumentError do
-                    SigSlot.connect testobj.slot(:signal), :slot
+                    SigSlot.connect testobj.slot(:signal_0_params), :slot_0_params
                 end
                 assert_raise ArgumentError do
-                    SigSlot.connect testobj.slot(:signal), testobj.slot(:invalid)
+                    SigSlot.connect testobj.slot(:signal_0_params), testobj.slot(:invalid)
                 end
             end
         

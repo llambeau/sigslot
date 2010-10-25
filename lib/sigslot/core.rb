@@ -34,6 +34,11 @@ module SigSlot
         raise ArgumentError, "Only signal names must be given as first argument to object.connect" unless Symbol === signal
         signal = valid_signal!(SignalDefinition.new(self, signal))
         endpoint = valid_endpoint!(endpoint)
+        
+        if signal.name == :signal_emitted && endpoint.object == self then
+            raise InvalidSignalBinding, ":signal_emitted can't be bound to a signal of the same object (infinite loop)"
+        end
+        
         connections[signal.name] << endpoint
     end
     

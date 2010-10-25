@@ -207,6 +207,7 @@ module SigSlot
             # Test the special signal :signal_emitted
             def test_signal_emitted
                 test = SimpleSigSlotTest.new
+                test2 = SimpleSigSlotTest.new
                 
                 # Assert it exists
                 assert test.has_signal?(:signal_emitted)
@@ -218,19 +219,19 @@ module SigSlot
                 
                 # Assert we can observe all signal emitted by connecting something to :signal_emitted
                 assert_nothing_raised do
-                    test.connect :signal_emitted, test.slot(:slot_without_parameters)
+                    test.connect :signal_emitted, test2.slot(:slot_without_parameters)
                 end
                 test.emit_signal(:signal_without_parameters)
-                assert_equal(1, test.calls[:slot_without_parameters][:count])
+                assert_equal(1, test2.calls[:slot_without_parameters][:count])
                 
                 # Assert signal_emitted pass correct arguments [:signal_name, :signal_parameters]
                 assert_nothing_raised do
-                    test.connect :signal_emitted, test.slot(:slot_with_parameters)
+                    test.connect :signal_emitted, test2.slot(:slot_with_parameters)
                 end
                 test.emit_signal :signal_with_parameters, [1,2]
-                assert_equal(2, test.calls[:slot_without_parameters][:count])
-                assert_equal(1, test.calls[:slot_with_parameters][:count])
-                assert_equal([:signal_with_parameters, [1,2]], test.calls[:slot_with_parameters][:params])
+                assert_equal(2, test2.calls[:slot_without_parameters][:count])
+                assert_equal(1, test2.calls[:slot_with_parameters][:count])
+                assert_equal([:signal_with_parameters, [1,2]], test2.calls[:slot_with_parameters][:params])
             end
             
             # Test the special global signal :signal_emitted by SigSlot module
