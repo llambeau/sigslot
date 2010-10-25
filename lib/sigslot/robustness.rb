@@ -32,7 +32,7 @@ module SigSlot
             case endpoint
             when SignalDefinition
                 valid_signal!(object, endpoint)
-                raise ArgumentError, "You cannot use the special ':signal_emitted' as endpoint of a connection" if endpoint.name == :signal_emitted
+                raise ArgumentError, "You cannot use the special ':signal_emitted' as endpoint of a connection", caller[1] if endpoint.name == :signal_emitted
             when SlotDefinition
                 valid_slot!(object, endpoint)
             else
