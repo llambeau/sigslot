@@ -33,6 +33,5 @@ end #SigSlot
 require 'sigslot/robustness'
 require 'sigslot/core'
 require 'sigslot/exceptions'
-require 'sigslot/object_helpers'
 require 'sigslot/class_helpers'
 require 'sigslot/rewriter'

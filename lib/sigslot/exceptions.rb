@@ -9,4 +9,7 @@ module SigSlot
     class InvalidSignalBinding < StandardError
     end
             
+    class InvalidSignalParameters < StandardError
+    end
+            
 end #SigSlot

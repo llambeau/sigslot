@@ -39,8 +39,8 @@ module SigSlot
                 param1
             end
             
-            def emit_signal(signal, parameters=[])
-                emit signal, parameters
+            def emit_signal(signal, *parameters)
+                emit signal, *parameters
             end
         end
 
@@ -74,7 +74,7 @@ module SigSlot
                     test.emit_signal :unknown_signal
                 end
                 assert_raise SignalNotFound do
-                    test.emit_signal :unknown_signal, ["hi!"]
+                    test.emit_signal :unknown_signal, "hi!"
                 end
                 
                 # Nothing raised for correct signals and parameters
@@ -82,7 +82,7 @@ module SigSlot
                     test.emit_signal :signal_without_parameters
                 end
                 assert_nothing_raised do
-                    test.emit_signal :signal_with_parameters, [1, 2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
             end
         
@@ -125,7 +125,7 @@ module SigSlot
                 test = SimpleSigSlotTest.new
                 assert_nothing_raised do
                     test.connect :signal_with_parameters, test.slot(:slot_without_parameters)
-                    test.emit_signal :signal_with_parameters, [1, 2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
             end
             
@@ -141,7 +141,7 @@ module SigSlot
                 test = SimpleSigSlotTest.new
                 assert_nothing_raised do
                     test.connect :signal_with_parameters, test.slot(:slot_without_parameters)
-                    test.emit_signal :signal_with_parameters, [1, 2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
             end
             
@@ -149,7 +149,7 @@ module SigSlot
                 test = SimpleSigSlotTest.new
                 assert_nothing_raised do
                     test.connect :signal_with_parameters, test.slot(:slot_without_parameters)
-                    test.emit_signal :signal_with_parameters, [1,2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
             end
             
@@ -170,7 +170,7 @@ module SigSlot
                     # Connect ...
                     test.connect :signal_with_parameters, test.slot(:slot_with_parameters)
                     # ... and emit the signal
-                    test.emit_signal :signal_with_parameters, [1, 2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
                 assert_equal(2, test.calls.size)
                 assert_equal(1, test.calls[:slot_with_parameters][:count])
@@ -198,7 +198,7 @@ module SigSlot
                     # Connect the second signal to a slot
                     test.connect :another_signal_with_parameters, test.slot(:slot_with_parameters)
                     # ... and emit the signal
-                    test.emit_signal :signal_with_parameters, [1, 2]
+                    test.emit_signal :signal_with_parameters, 1, 2
                 end
                 assert_equal(2, test.calls.size)
                 assert_equal(1, test.calls[:slot_with_parameters][:count])
@@ -228,7 +228,7 @@ module SigSlot
                 assert_nothing_raised do
                     test.connect :signal_emitted, test2.slot(:slot_with_parameters)
                 end
-                test.emit_signal :signal_with_parameters, [1,2]
+                test.emit_signal :signal_with_parameters, 1, 2
                 assert_equal(2, test2.calls[:slot_without_parameters][:count])
                 assert_equal(1, test2.calls[:slot_with_parameters][:count])
                 assert_equal([:signal_with_parameters, [1,2]], test2.calls[:slot_with_parameters][:params])
@@ -261,7 +261,7 @@ module SigSlot
                 test.connect :signal_with_parameters, test.slot(:slot_with_parameters)
                 test.connect :signal_with_parameters, test.slot(:slot_without_parameters)
                 test.disconnect :signal_with_parameters
-                test.emit_signal :signal_with_parameters, [1,2]
+                test.emit_signal :signal_with_parameters, 1, 2
                 test.calls.each_pair do |signal, infos|
                     assert_equal(0, infos[:count])
                 end

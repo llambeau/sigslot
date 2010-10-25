@@ -19,7 +19,7 @@ module SigSlot
 
             def set_hungry
                 @hungry_count += 1
-                emit :cry, [self]
+                emit :cry, self
             end
             
             def suckle

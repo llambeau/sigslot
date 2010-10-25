@@ -37,7 +37,7 @@ module SigSlot
             raise SlotNotFound, "Slot '#{slot.name}' not found on object '#{slot.object}'", caller[1] unless slot.object.has_slot? slot
             slot
         end
-  
+        
         def valid_endpoint!(endpoint)
             case endpoint
             when SignalDefinition
@@ -51,6 +51,11 @@ module SigSlot
             endpoint
         end
     
+        def valid_signal_parameters!(signal, params)
+            sig_def = signals[signal]
+            raise InvalidSignalParameters, "Bad parameters: #{params.inspect} for signal :#{signal}#{sig_def.inspect}" unless params.size == sig_def.size
+        end
+  
     end #Robustness
 
 end #SigSlot

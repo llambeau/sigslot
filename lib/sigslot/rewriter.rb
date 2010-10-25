@@ -23,7 +23,7 @@ module SigSlot
         
         def rewrite(*params)
             params = @block.call(params)
-            emit :rewrited, params
+            emit :rewrited, *params
         end
     
     end

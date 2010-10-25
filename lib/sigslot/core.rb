@@ -79,9 +79,9 @@ module SigSlot
     end
 
     # Emit a signal
-    def emit(signal, params=[])
+    def emit(signal, *params)
         valid_signal!(SignalDefinition.new(self, signal))
-        raise ArgumentError, "Parameters must be an array" unless params.is_a? Array
+        valid_signal_parameters!(signal, params)
         
         # Trigger all signals or slots bound to the emitted signal
         connections[signal].each do |con|
@@ -90,7 +90,7 @@ module SigSlot
         
         # Emit the special signal :signal_emitted 
         unless signal == :signal_emitted then
-            emit :signal_emitted, [signal, params]
+            emit :signal_emitted, signal, params
         end
         
         # Trigger all endpoints connected to the global special signal :signal_emitted
@@ -109,7 +109,7 @@ module SigSlot
         # Propagate signals to bound signals
         case endpoint
         when SignalDefinition 
-            recipient.emit(endpoint.name, params) # Emit bound signal
+            recipient.emit(endpoint.name, *params) # Emit bound signal
         # Propagate signals to bound slots
         when SlotDefinition then
             slot_name = endpoint.name
@@ -121,7 +121,7 @@ module SigSlot
                 begin
                     recipient.send slot_name, *params
                 rescue => ex
-                    raise InvalidSignalBinding, "Invalid binding between signal '#{signal}' and slot '#{slot_name}'. Bad arity"
+                    raise ex
                 end
             elsif slot_arity > params.size then
                 raise InvalidSignalBinding, "Invalid binding between signal '#{signal}' and slot '#{slot_name}'. Bad arity"
