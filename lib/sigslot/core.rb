@@ -7,7 +7,7 @@ module SigSlot
         @@signal_emitted_connections = [] 
         base.class_eval do
             @signals = {
-                :signal_emitted => [:signal, :params]
+                :signal_emitted => [:signal, :params] # Special signal to monitor all emissions of an object
             }
             @slots = []
         end
@@ -39,20 +39,9 @@ module SigSlot
     
     # Connect a signal to a slot
     def connect(signal, recipient, endpoint)
-        signal_name = valid_signal_name!(signal)
-        raise SignalNotFound, "Signal '#{signal_name}' not found on object '#{self}'" unless has_signal? signal
-
-        if endpoint.is_a? SignalDefinition then
-            raise SignalNotFound, "Signal '#{endpoint.name}' not found on object '#{recipient}'" unless recipient.has_signal? endpoint
-            raise ArgumentError, "You cannot use the special ':signal_emitted' as endpoint of a connection" if endpoint.name == :signal_emitted
-        
-            connections[signal_name] << {:recipient => recipient, :endpoint => endpoint}
-        elsif endpoint.is_a? SlotDefinition then
-            raise SlotNotFound, "Slot '#{endpoint.name}' not found on object '#{recipient}'" unless recipient.has_slot? endpoint
-            connections[signal_name] << {:recipient => recipient, :endpoint => endpoint}
-        else
-            raise ArgumentError, "Endpoint of connect must be a valid Signal or Slot definition. Please use SLOT(:name) or SIGNAL(:name) helpers"
-        end
+        signal = valid_signal!(self, signal)
+        valid_endpoint!(recipient, endpoint)
+        connections[signal] << {:recipient => recipient, :endpoint => endpoint}
     end
     
     # Access connections
@@ -72,9 +61,8 @@ module SigSlot
 
     # Emit a signal
     def emit(signal, params=[])
-        raise ArgumentError, "Signal names must be Symbols" unless signal.is_a? Symbol
+        valid_signal!(self, signal)
         raise ArgumentError, "Parameters must be an array" unless params.is_a? Array
-        raise SignalNotFound, "Signal '#{signal}' not found" unless signals.has_key? signal
         
         # Trigger all signals or slots bound to the emitted signal
         connections[signal].each do |con|
@@ -100,18 +88,13 @@ module SigSlot
     def trigger(signal, con, params)
         recipient = con[:recipient]
         # Propagate signals to bound signals
-        if con[:endpoint].is_a? SignalDefinition then
-            unless con[:recipient].has_signal? con[:endpoint] then
-                raise SlotNotFound, "Signal '#{con[:endpoint].name}' not found on object '#{con[:recipient]}'" 
-            end
-            recipient.emit(con[:endpoint].name, params) # Emit bound signal
+        endpoint = con[:endpoint]
+        case endpoint
+        when SignalDefinition 
+            recipient.emit(endpoint.name, params) # Emit bound signal
         # Propagate signals to bound slots
-        elsif con[:endpoint].is_a? SlotDefinition then
-            unless con[:recipient].has_slot? con[:endpoint] then
-                raise SlotNotFound, "Slot '#{con[:endpoint].name}' not found on object '#{con[:recipient]}'" 
-            end
-            
-            slot_name = con[:endpoint].name
+        when SlotDefinition then
+            slot_name = endpoint.name
             slot_arity = recipient.method(slot_name).arity
             #
             # TODO: Because of strange values reported by #arity, there are sleeping bugs here
@@ -131,9 +114,6 @@ module SigSlot
                     recipient.send slot_name, *params[0..slot_arity-1]
                 end
             end
-        else
-            # This should never happend
-            raise ArgumentError, "Invalid endpoint given to connection while emitting signal: #{con[:endpoint]}"
         end
     end
     
