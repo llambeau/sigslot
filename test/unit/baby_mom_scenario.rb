@@ -3,7 +3,7 @@ require 'sigslot'
 module SigSlot
     
     module Tests
-
+    
         class Baby
             include SigSlot
 

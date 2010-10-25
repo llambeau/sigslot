@@ -20,8 +20,13 @@ module SigSlot
 
     # Connect a signal to a slot 
     def self.connect(signal, endpoint)
-        raise ArgumentError, "Bad signal definition #{signal.inspect}" unless SignalDefinition === signal
-        signal.object.connect(signal.name, endpoint)
+        case signal
+        when :signal_emitted
+            @@signal_emitted_connections << endpoint
+        else
+            raise ArgumentError, "Bad signal definition #{signal.inspect}" unless SignalDefinition === signal
+            signal.object.connect(signal.name, endpoint)
+        end
     end
     
     # Connect a signal to a slot
