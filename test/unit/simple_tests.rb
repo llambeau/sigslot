@@ -210,7 +210,7 @@ module SigSlot
                 test = SimpleSigSlotTest.new
                 
                 # Assert it exists
-                assert test.has_signal? :signal_emitted
+                assert test.has_signal?(:signal_emitted)
                 
                 # Assert we can't use this signal as endpoint of a connection
                 assert_raise ArgumentError do
