@@ -1,5 +1,7 @@
 module SigSlot
 
+    VERSION = "0.0.1".freeze
+
     # Used to represent a signal
     class SignalDefinition
         attr_reader :name, :object

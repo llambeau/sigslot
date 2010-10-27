@@ -80,8 +80,11 @@ module SigSlot
 
     # Emit a signal
     def emit(signal, *params)
-        valid_signal!(SignalDefinition.new(self, signal))
+		signal_def = SignalDefinition.new(self, signal)
+        valid_signal!(signal_def)
         valid_signal_parameters!(signal, params)
+
+		push_sender(signal_def)
         
         # Trigger all signals or slots bound to the emitted signal
         connections[signal].each do |con|
@@ -97,8 +100,26 @@ module SigSlot
         @@signal_emitted_connections.each do |con|
             trigger(:signal_emitted, con, [self, signal, params])
         end
+		pop_sender
     end
     
+	def self.sender
+		self.signals_senders[Thread.current.object_id].last
+	end
+	
+	def push_sender(sender)
+		SigSlot.signals_senders[Thread.current.object_id] << sender
+	end
+
+	def pop_sender
+		SigSlot.signals_senders[Thread.current.object_id].pop
+	end
+	
+	private
+	def self.signals_senders
+		@@signals_senders ||= Hash.new {|h,k| h[k] = []}
+	end
+	
     # Used to trigger and endpoint
     # signal is the name of the signal which triggers these endpoints
     # con is the endpoint definition

@@ -1,0 +1,38 @@
+h1. SigSlot - Signals and Slots for ruby
+
+SigSlot aims to provide signals and slots in ruby, as in Qt/C++
+
+h2. Signals and slots - Qt's concept
+
+As wikipedia says:
+
+bq. Signals and slots is a language construct introduced in Qt, which makes it easy to implement the Observer pattern 
+while avoiding boilerplate code. The concept is that controls (also known as widgets) can send signals containing 
+event information which can be received by other controls using special functions known as slots.
+
+h2. SigSlot in ruby
+
+Basic example (same example as in Qt's doc):
+
+<pre>
+require 'sigslot'
+
+class Counter
+	include SigSlot
+	
+	signal :value_changed, [:new_value, :old_value]
+	slot :value=
+	
+	attr_reader :value
+	def initialize
+		@value = 0
+	end
+	
+	def value=(value)
+		if @value != value then
+			oldvalue, @value = @value, value
+			emit :value_changed, @value, oldvalue
+		end
+	end
+end
+</pre>
