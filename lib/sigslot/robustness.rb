@@ -1,7 +1,7 @@
 module SigSlot
 
     module Robustness
-        
+
         def valid_signal_name!(signal)
             case signal
             when Symbol
@@ -16,7 +16,7 @@ module SigSlot
         end
         alias :valid_slot_name! :valid_signal_name!
         alias :valid_endpoint_name! :valid_signal_name!
-  
+
         def valid_signal_def!(signal)
             unless signal.respond_to?(:name) && signal.respond_to?(:object) then
                 raise ArgumentError, "Invalid signal/slot definition #{signal}", caller[1]
@@ -25,19 +25,19 @@ module SigSlot
         end
         alias :valid_slot_def! :valid_signal_def!
         alias :valid_endpoint_def! :valid_signal_def!
-  
+
         def valid_signal!(signal)
             signal = valid_signal_def!(signal)
             raise SignalNotFound, "Signal '#{signal.name}' not found on object '#{signal.object}'", caller[1] unless signal.object.has_signal? signal
             signal
         end
-  
+
         def valid_slot!(slot)
             slot = valid_slot_def!(slot)
             raise SlotNotFound, "Slot '#{slot.name}' not found on object '#{slot.object}'", caller[1] unless slot.object.has_slot? slot
             slot
         end
-        
+
         def valid_endpoint!(endpoint)
             case endpoint
             when SignalDefinition
@@ -50,12 +50,12 @@ module SigSlot
             end
             endpoint
         end
-    
+
         def valid_signal_parameters!(signal, params)
             sig_def = signals[signal]
             raise InvalidSignalParameters, "Bad parameters: #{params.inspect} for signal :#{signal}#{sig_def.inspect}" unless params.size == sig_def.size
         end
-  
+
     end #Robustness
 
 end #SigSlot

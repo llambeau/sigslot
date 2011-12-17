@@ -8,10 +8,10 @@ module SigSlot
         def initialize(object, name)
             @object, @name = object, name
         end
-        
+
         def ==(obj)
-            SignalDefinition === obj && 
-                obj.name == @name && 
+            SignalDefinition === obj &&
+                obj.name == @name &&
                 obj.object == @object
         end
     end
@@ -25,7 +25,7 @@ module SigSlot
 
         def ==(obj)
             SlotDefinition === obj &&
-                obj.name == @name && 
+                obj.name == @name &&
                 obj.object == @object
         end
     end
