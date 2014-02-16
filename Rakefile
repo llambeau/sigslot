@@ -40,7 +40,7 @@ gemspec = Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README.textile", "LICENCE.textile"]
   s.rdoc_options << '--title' << 'SigSlot - Signals and Slots for ruby' <<
                     '--main' << 'README.textile' <<
-                    '--line-numbers'  
+                    '--line-numbers'
   s.author = "Louis Lambeau"
   s.email = "louislambeau@gmail.com"
   s.homepage = "http://github.com/llambeau/sigslot"
